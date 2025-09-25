@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>2025 Climbing goals</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f7f7f7;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    #bingo-card {
+      display: grid;
+      grid-template-columns: repeat(5, 80px);
+      grid-template-rows: repeat(5, 80px);
+      gap: 10px;
+      justify-content: center;
+      margin: 0 auto;
+      max-width: 480px;
+    }
+    .bingo-cell {
+      background: #fff;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+      font-size: 1rem;
+      transition: background 0.2s, border-color 0.2s;
+      padding: 8px;
+      text-align: center;
+      min-height: 0;
+    }
+    .bingo-cell.checked {
+      background: #c3f7c3;
+      border-color: #54c454;
+    }
+    .bingo-cell.center {
+      background: #ffe28a;
+      border-color: #e0b500;
+      font-weight: bold;
+      font-size: 1.1rem;
+      cursor: default;
+    }
+  </style>
+</head>
+<body>
+  <h1>2025 Climbing goals</h1>
+  <div id="bingo-card"></div>
+  <script>
+    // Bingo items from prompt
+    const bingoItems = [
+      "Sport 21+",
+      "Trad 15+",
+      "Tope Rope 23+",
+      "Boulder 6B+",
+      "Night climb",
+      "Multi-pitch lunch",
+      "Overnight trip",
+      "Victory whip",
+      "Gym",
+      "Another Province",
+      "Sea cliff",
+      "Free standing tower",
+      "Sport",
+      "Trad",
+      "Boulder",
+      "Top Rope Solo",
+      "Multipitch",
+      "Deep water solo",
+      "Fist jam",
+      "Kneebar rest",
+      "Heel hook",
+      "Bat hang",
+      "Full Dyno",
+      "Place a hex"
+    ];
+
+    // Shuffle the bingo items for randomness
+    function shuffle(array) {
+      const arr = array.slice();
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // Get state from localStorage
+    function getCardState() {
+      try {
+        const state = localStorage.getItem('bingoCard2025');
+        return state ? JSON.parse(state) : Array(25).fill(false);
+      } catch {
+        return Array(25).fill(false);
+      }
+    }
+
+    // Save state to localStorage
+    function saveCardState(state) {
+      localStorage.setItem('bingoCard2025', JSON.stringify(state));
+    }
+
+    // Build the bingo card grid
+    function renderBingoCard() {
+      const cardContainer = document.getElementById('bingo-card');
+      cardContainer.innerHTML = '';
+      let items = shuffle(bingoItems);
+      // Center index
+      const centerIndex = 12;
+      // Insert the center block
+      items.splice(centerIndex, 0, "Go Wild!!!");
+      // Load checked state
+      let checkedState = getCardState();
+      for (let i = 0; i < 25; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'bingo-cell';
+        cell.dataset.index = i;
+        cell.innerHTML = items[i];
+        if (checkedState[i]) cell.classList.add('checked');
+        if (i === centerIndex) {
+          cell.classList.add('center');
+        } else {
+          cell.addEventListener('click', function() {
+            checkedState[i] = !checkedState[i];
+            saveCardState(checkedState);
+            cell.classList.toggle('checked');
+          });
+        }
+        cardContainer.appendChild(cell);
+      }
+    }
+
+    // On first load, check if we have a saved item order. If not, save it (so grid stays consistent between reloads!)
+    function getOrSetItemOrder() {
+      let order = localStorage.getItem('bingoCard2025-order');
+      if (!order) {
+        let shuffled = shuffle(bingoItems);
+        shuffled.splice(12, 0, "Go Wild!!!");
+        localStorage.setItem('bingoCard2025-order', JSON.stringify(shuffled));
+        return shuffled;
+      }
+      return JSON.parse(order);
+    }
+
+    // Render card with persistent order
+    function renderPersistentBingoCard() {
+      const cardContainer = document.getElementById('bingo-card');
+      cardContainer.innerHTML = '';
+      let items = getOrSetItemOrder();
+      let checkedState = getCardState();
+      for (let i = 0; i < 25; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'bingo-cell';
+        cell.dataset.index = i;
+        cell.innerHTML = items[i];
+        if (checkedState[i]) cell.classList.add('checked');
+        if (i === 12) {
+          cell.classList.add('center');
+        } else {
+          cell.addEventListener('click', function() {
+            checkedState[i] = !checkedState[i];
+            saveCardState(checkedState);
+            cell.classList.toggle('checked');
+          });
+        }
+        cardContainer.appendChild(cell);
+      }
+    }
+
+    renderPersistentBingoCard();
+  </script>
+</body>
+</html>
